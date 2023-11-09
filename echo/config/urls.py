@@ -20,5 +20,14 @@ from django.urls import include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-#    path('', include('accounts.urls')),
+    path('', include('accounts.urls')),
+    path('sign/', include('sign.urls')),
+    #или
+    path('sign/', 'views.register', name='sign'),
+    path('accounts/', include('allauth.urls')),
+    path('profile/', include('profile.urls')),
+    # или
+    path('profile/', 'views.profile', name='profile'),
+    path('', include('social_net.urls')),
+
 ]

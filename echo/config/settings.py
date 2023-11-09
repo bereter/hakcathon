@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 import os
 from pathlib import Path
-from KEY import DJANGO_KEY
+#from KEY import DJANGO_KEY
 from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(find_dotenv())
