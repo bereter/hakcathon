@@ -1,56 +1,90 @@
 from django.db import models
-from django.contrib.auth.models import User
+from .accounts import CustomUser as User
 from resources import *
 from django.urls import reverse
 from django.core.mail import send_mail
 from django.db.models.functions import Coalesce
 from django.db.models import Sum
 
-# Create your models here.
-
-
-class Author(models.Model):
-    author = models.OneToOneField(User, on_delete=models.CASCADE)
-    rating = models.IntegerField(default=0)
-
-    def update_rating(self):
-        post_rating = Post.objects.filter(author=self).\
-            aggregate(p_r=Coalesce(Sum('post_rating'), 0))['p_r']
-
-        self.rating = post_rating
-        self.save()
-
-    def __str__(self):
-        return self.author.username
-
-
-
-class Category(models.Model):
-    name = models.CharField(max_length=100, unique=True, default=None)
-
-    def __str__(self):
-        return self.name
-
 
 class Post(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    """
+    Модель для представления постов.
+
+    Поля:
+        author (ForeignKey): Автор поста.
+        date_created (DateTimeField): Дата создания поста.
+        category (CharField): Категория поста.
+        header (CharField): Заголовок поста.
+        content (TextField): Содержание поста.
+        image1 (ImageField): Изображение к посту (необязательное).
+        post_rating (IntegerField): Рейтинг поста.
+
+    Методы:
+        get_category_display_ru(): Возвращает название категории на русском языке.
+        like(): Увеличивает рейтинг поста на единицу.
+        preview(): Возвращает превью содержания поста (первые 100 символов).
+        __str__(): Возвращает строковое представление поста в формате "Заголовок: Превью содержания".
+
+    """
+
+    author = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
-    categories = models.CharField(max_length=2, choices=CATEGORIES, default='MV')
+    CATEGORY_CHOICES = (
+        ('MV', 'Кино'),
+        ('SP', 'Спорт'),
+        ('CL', 'Культура'),
+        ('FD', 'Еда'),
+    )
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
     header = models.CharField(max_length=100)
     content = models.TextField()
+    image1 = models.ImageField(blank=True)
+    post_rating = models.IntegerField(default=0)
+
+    def get_category_display_ru(self):
+        """
+        Возвращает название категории на русском языке.
+        """
+        category_choices = dict(self.CATEGORY_CHOICES)
+        return category_choices.get(self.category, '')
 
     def like(self):
+        """
+        Увеличивает рейтинг поста на единицу.
+        """
         self.post_rating += 1
         self.save()
 
     def preview(self):
+        """
+        Возвращает превью содержания поста (первые 100 символов).
+        """
         return self.content[:100] + '...' if len(self.content) > 100 else self.content
 
     def __str__(self):
+        """
+        Возвращает строковое представление поста в формате "Заголовок: Превью содержания".
+        """
         return f'{self.header}: {self.content[:100]}'
 
 
 class Comment(models.Model):
+    """
+    Модель для представления комментариев к постам.
+
+    Поля:
+        comment_post (ForeignKey): Пост, к которому оставлен комментарий.
+        user (ForeignKey): Пользователь, оставивший комментарий.
+        text (TextField): Текст комментария.
+        time_create (DateTimeField): Дата и время создания комментария.
+        comment (BooleanField): Флаг, указывающий, является ли комментарий ответом на другой комментарий.
+
+    Методы:
+        send_email(): Отправляет уведомление по электронной почте об отклике на публикацию.
+        __str__(): Возвращает текст комментария.
+    """
+
     comment_post = models.ForeignKey(Post, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     text = models.TextField()
@@ -58,13 +92,18 @@ class Comment(models.Model):
     comment = models.BooleanField(default=False)
 
     def send_email(self):
+        """
+        Отправляет уведомление по электронной почте об отклике на публикацию.
+        """
         subject = 'Отклик на публикацию'
-        message = 'Здравствуйте! На вашу публикацию "{}" появился новый отклик. С уважением, Echo.'.\
-            format(self.post.header)
-        from_email = 'admin_email'
-        recipient_list = [self.post.author.email]
+        message = f'Здравствуйте! На вашу публикацию "{self.comment_post.header}" появился новый отклик. С уважением, Echo.'
+        from_email = admin_email
+        recipient_list = [self.comment_post.author.email]
 
         send_mail(subject, message, from_email, recipient_list)
 
     def __str__(self):
+        """
+        Возвращает текст комментария.
+        """
         return self.text
