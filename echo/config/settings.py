@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'social_django',
+    'rest_framework',
 
     ####
     # add apps
@@ -138,3 +140,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 SITE_ID = 1
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
+
+SOCIAL_AUTH_VK_OAUTH2_KEY = 'Ваш_ID_приложения_ВКонтакте'
+SOCIAL_AUTH_VK_OAUTH2_SECRET = 'Ваш_секретный_ключ_приложения_ВКонтакте'
+SOCIAL_AUTH_VK_OAUTH2_SCOPE = ['email']
+SOCIAL_AUTH_VK_OAUTH2_EXTRA_DATA = ['photo_200']
+
