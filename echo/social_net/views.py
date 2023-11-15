@@ -1,14 +1,14 @@
 from django.shortcuts import render
-from rest_framework import generics
+from rest_framework import generics, viewsets
 from .models import Post, Profile
 from .serializers import PostSerializer, ProfileSerializer
 
 
-class PostListAPIViev(generics.ListAPIView):
+class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
 
 
-class ProfileAPIViev(generics.RetrieveAPIView):
+class ProfileViewSet(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
