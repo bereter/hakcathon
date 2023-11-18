@@ -37,7 +37,8 @@ class Post(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     categories = models.CharField(max_length=2, choices=CATEGORIES, default='MV')
     header = models.CharField(max_length=100)
-    content = models.TextField()
+    content = models.TextField(null=True)
+#    image = models.ImageField()
 
     def like(self):
         self.post_rating += 1

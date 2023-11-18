@@ -17,17 +17,44 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.urls import include
+from django.contrib.auth.models import User
+from rest_framework import routers, serializers, viewsets
+from accounts.views import PostViewSet, CategoryViewSet, CommentViewSet
+
+
+
+
+class UserSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = User
+        fields = ['url', 'username', 'email', 'is_staff']
+
+# ViewSets define the view behavior.
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+router = routers.DefaultRouter()
+router.register(r'users', UserViewSet)
+router.register(r'posts', PostViewSet, basename='post')
+router.register(r'categories', CategoryViewSet, basename='category')
+router.register(r'comments', CommentViewSet, basename='comment')
+
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('accounts.urls')),
-    path('sign/', include('sign.urls')),
-    #или
-    path('sign/', 'views.register', name='sign'),
-    path('accounts/', include('allauth.urls')),
-    path('profile/', include('profile.urls')),
-    # или
-    path('profile/', 'views.profile', name='profile'),
-    path('', include('social_net.urls')),
-
+#    path('', include('accounts.urls')),
+#    path('sign/', include('accounts.urls')),
+    path('api-auth/', include('rest_framework.urls')),
+    path('', include(router.urls)),
 ]
+    #или
+    # path('sign/', 'views.register', name='sign'),
+    # path('accounts/', include('allauth.urls')),
+    # path('profile/', include('profile.urls')),
+    # # или
+    # path('profile/', 'views.profile', name='profile'),
+    # path('', include('social_net.urls')),
+
+#]
