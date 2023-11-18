@@ -1,4 +1,3 @@
-
 Movie = 'MV'
 Concerts = 'CO'
 Exhibitions = 'EX'

@@ -16,14 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from social_net.views import PostViewSet, ProfileViewSet
+from social_net.views import *
 from django.urls import include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/v1/post_list/', PostViewSet.as_view({'get': 'list', 'post': 'create'})),
-    path('api/v1/profile/<int:pk>/', ProfileViewSet.as_view({'get': 'retrieve', 'put': 'update'})),
-
+    path('api/v1/post_list/', PostsViewSet.as_view({'get': 'list'})),
+    path('api/v1/profile/<int:pk>/', ProfileViewSet.as_view({'get': 'retrieve', 'put': 'partial_update'})),
+    # path('api/v1/post_list_category/', CategoryPostsViewSet.as_view({'get': 'list'})),
     # path('', include('accounts.urls')),
     # path('sign/', include('sign.urls')),
     # #или

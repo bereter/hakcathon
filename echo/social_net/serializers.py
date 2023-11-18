@@ -9,8 +9,8 @@ from .models import *
 #         fields = '__all__'
 
 
-class PostSerializer(serializers.ModelSerializer):
-
+class PostsSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     class Meta:
         model = Post
         depth = 1
@@ -29,4 +29,4 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         depth = 1
-        fields = ['author', 'photo', 'description', 'post_user']
+        fields = ['author', 'photo', 'description', 'post_user', 'subscribers']

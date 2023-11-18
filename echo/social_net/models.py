@@ -6,6 +6,7 @@ from django.core.mail import send_mail
 from django.db.models.functions import Coalesce
 from django.db.models import Sum
 
+
 # Create your models here.
 
 
@@ -14,10 +15,10 @@ class Profile(models.Model):
     photo = models.ImageField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     rating = models.IntegerField(default=0)
-
+    subscribers = models.ManyToManyField('Category', through='SubscribersCategory', blank=True)
 
     def update_rating(self):
-        post_rating = Post.objects.filter(author=self).\
+        post_rating = Post.objects.filter(author=self). \
             aggregate(p_r=Coalesce(Sum('post_rating'), 0))['p_r']
 
         self.rating = post_rating
@@ -27,22 +28,27 @@ class Profile(models.Model):
         return self.author.username
 
 
-
 class Category(models.Model):
-    name = models.CharField(max_length=100, unique=True, default=None)
+    categories = models.CharField(max_length=2, choices=CATEGORIES, default='MV')
 
     def __str__(self):
-        return self.name
+        return self.categories
+
+
+class SubscribersCategory(models.Model):
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    user = models.ForeignKey(Profile, on_delete=models.CASCADE)
+
 
 
 class Post(models.Model):
-
     user = models.ForeignKey(Profile, on_delete=models.CASCADE, null=True, related_name='post_user')
     date_created = models.DateTimeField(auto_now_add=True)
     categories = models.CharField(max_length=2, choices=CATEGORIES, default='MV')
     header = models.CharField(max_length=100)
     photo = models.ImageField(null=True, blank=True)
     content = models.TextField()
+    estimation = models.IntegerField(default=0)
 
     def like(self):
         self.post_rating += 1
@@ -64,7 +70,7 @@ class Comment(models.Model):
 
     def send_email(self):
         subject = 'Отклик на публикацию'
-        message = 'Здравствуйте! На вашу публикацию "{}" появился новый отклик. С уважением, Echo.'.\
+        message = 'Здравствуйте! На вашу публикацию "{}" появился новый отклик. С уважением, Echo.'. \
             format(self.post.header)
         from_email = 'admin_email'
         recipient_list = [self.post.author.email]
