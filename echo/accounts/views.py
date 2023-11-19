@@ -8,6 +8,7 @@ from social_net.serializers import *
 class PostViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
     queryset = Post.objects.all()
+    filterset_fields = ['categories']
 
 
 

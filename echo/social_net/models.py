@@ -39,6 +39,11 @@ class Post(models.Model):
     header = models.CharField(max_length=100)
     content = models.TextField(null=True)
 #    image = models.ImageField()
+    class Meta:
+        ordering = ('-date_created',)
+
+    def __str__(self):
+        return f'{self.header}: {self.content[:100]}'
 
     def like(self):
         self.post_rating += 1
@@ -47,8 +52,7 @@ class Post(models.Model):
     def preview(self):
         return self.content[:100] + '...' if len(self.content) > 100 else self.content
 
-    def __str__(self):
-        return f'{self.header}: {self.content[:100]}'
+
 
 
 class Comment(models.Model):

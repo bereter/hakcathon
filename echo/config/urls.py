@@ -24,21 +24,11 @@ from accounts.views import PostViewSet, CategoryViewSet, CommentViewSet
 
 
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = User
-        fields = ['url', 'username', 'email', 'is_staff']
-
-# ViewSets define the view behavior.
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
 router = routers.DefaultRouter()
-router.register(r'users', UserViewSet)
-router.register(r'posts', PostViewSet, basename='post')
-router.register(r'categories', CategoryViewSet, basename='category')
-router.register(r'comments', CommentViewSet, basename='comment')
+
+router.register('posts', PostViewSet, basename='post')
+router.register('categories', CategoryViewSet, basename='category')
+router.register('comments', CommentViewSet, basename='comment')
 
 
 
@@ -47,7 +37,7 @@ urlpatterns = [
 #    path('', include('accounts.urls')),
 #    path('sign/', include('accounts.urls')),
     path('api-auth/', include('rest_framework.urls')),
-    path('', include(router.urls)),
+    path('v1/', include(router.urls)),
 ]
     #или
     # path('sign/', 'views.register', name='sign'),
