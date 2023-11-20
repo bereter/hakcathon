@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from rest_framework import generics, viewsets, filters
 from rest_framework.pagination import PageNumberPagination
-from .models import Post, Profile
+from .models import Post
+from accounts.models import CustomUser as Profile
 from .serializers import PostsSerializer, ProfileSerializer
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from .permissions import IsOwnerOrReadOnly
