@@ -1,25 +1,26 @@
 from django.db import models
-from accounts.models import CustomUser as User
+from accounts.models import CustomUser
 from resources import CATEGORIES
 from django.core.mail import send_mail
 
 
 class Category(models.Model):
     categories = models.CharField(max_length=2, choices=CATEGORIES, default='MV')
-    subscribers = models.ManyToManyField(User, blank=True, null=True, related_name='categories')
+    subscribers = models.ManyToManyField('self', symmetrical=False, blank=True, related_name='category_subscribers')
 
     def __str__(self):
         return self.categories
 
 
+
 class Post(models.Model):
-    author = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name='post_user')
+    author = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, related_name='post_user')
     date_created = models.DateTimeField(auto_now_add=True)
     postCategory = models.ManyToManyField(Category, through='PostCategory')
     header = models.CharField(max_length=100)
     image1 = models.ImageField(null=True, blank=True)
     content = models.TextField()
-    estimation = models.IntegerField(default=0)
+    post_rating = models.IntegerField(default=0)  # Поле рейтинга поста
 
     def like(self):
         self.post_rating += 1
@@ -34,7 +35,7 @@ class Post(models.Model):
 
 class Comment(models.Model):
     comment_post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comment')
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    author = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     text = models.TextField()
     time_create = models.DateTimeField(auto_now_add=True)
     comment = models.BooleanField(default=False)

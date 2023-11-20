@@ -1,21 +1,15 @@
 from rest_framework import serializers
-from .models import *
+from .models import Post
 from accounts.models import CustomUser as Profile
-
-
-# class CommentSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Comment
-#         depth = 1
-#         fields = '__all__'
 
 
 class PostsSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    comment_set = serializers.StringRelatedField(many=True)
+
     class Meta:
         model = Post
-        depth = 1
-        fields = ['user', 'date_created', 'categories', 'header', 'photo', 'content', 'estimation', 'comment']
+        fields = ['author', 'date_created', 'postCategory', 'header', 'photo', 'content', 'estimation', 'comment_set']
 
 
 class PhotoPostSerializer(serializers.ModelSerializer):
@@ -24,10 +18,9 @@ class PhotoPostSerializer(serializers.ModelSerializer):
         fields = ['photo']
 
 
-class ProfileSerializer(serializers.ModelSerializer):
-    post_user = PhotoPostSerializer(many=True)
+class UserSerializer(serializers.ModelSerializer):
+    post_user = PostsSerializer(many=True)
 
     class Meta:
         model = Profile
-        depth = 1
-        fields = ['author', 'photo', 'description', 'post_user', 'subscribers']
+        fields = ['username', 'photo', 'about', 'subscribers', 'post_user']

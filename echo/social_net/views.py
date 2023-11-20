@@ -2,10 +2,9 @@ from django.shortcuts import render
 from rest_framework import generics, viewsets, filters
 from rest_framework.pagination import PageNumberPagination
 from .models import Post
-from accounts.models import CustomUser as Profile
-from .serializers import PostsSerializer, ProfileSerializer
+from accounts.models import CustomUser as User
+from .serializers import PostsSerializer, UserSerializer
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from .permissions import IsOwnerOrReadOnly
 from django_filters.rest_framework import DjangoFilterBackend
 
 
@@ -19,8 +18,8 @@ class PostsViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostsSerializer
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
-    filterset_fields = ['categories', 'user']
-    ordering_fields = ['categories', 'date_created']
+    filterset_fields = ['postCategory__categories', 'author']  # Обновлено для связанного поля postCategory
+    ordering_fields = ['postCategory__categories', 'date_created']  # Обновлено для связанного поля postCategory
     ordering = ['-date_created']
     pagination_class = PaginationAPIList
     # permission_classes = (IsAuthenticatedOrReadOnly, )
@@ -30,10 +29,9 @@ class PostsViewSet(viewsets.ModelViewSet):
 #     queryset = Post.objects.all()
 #     serializer_class = PostSerializer
 #     filter_backends = [DjangoFilterBackend]
-#     filterset_fields = ['categories']
+#     filterset_fields = ['postCategory__categories']  # Обновлено для связанного поля postCategory
 
 
 class ProfileViewSet(viewsets.ModelViewSet):
-    queryset = Profile.objects.all()
-    serializer_class = ProfileSerializer
-    permission_classes = (IsOwnerOrReadOnly,)
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
