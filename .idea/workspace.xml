@@ -3,9 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="6a47d6ea-189f-42d7-b02c-3ced548a1e90" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/echo/config/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/echo/config/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/echo/config/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/echo/config/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/echo/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/echo/db.sqlite3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/echo/social_net/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/echo/social_net/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/echo/social_net/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/echo/social_net/serializers.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

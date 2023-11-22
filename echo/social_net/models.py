@@ -42,7 +42,8 @@ class SubscribersCategory(models.Model):
 
 
 class Post(models.Model):
-    user = models.ForeignKey(Profile, on_delete=models.CASCADE, null=True, related_name='post_user')
+    user = models.ForeignKey(Profile, on_delete=models.CASCADE, null=True, related_name='post_user',
+                             related_query_name='post_user')
     date_created = models.DateTimeField(auto_now_add=True)
     categories = models.CharField(max_length=2, choices=CATEGORIES, default='MV')
     header = models.CharField(max_length=100)

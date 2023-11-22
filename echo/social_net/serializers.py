@@ -2,19 +2,19 @@ from rest_framework import serializers
 from .models import *
 
 
-# class CommentSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Comment
-#         depth = 1
-#         fields = '__all__'
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ['author', 'photo']
 
 
 class PostsSerializer(serializers.ModelSerializer):
-    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    user = UserSerializer()
     class Meta:
         model = Post
         depth = 1
-        fields = ['user', 'date_created', 'categories', 'header', 'photo', 'content', 'estimation', 'comment']
+        fields = ['user', 'date_created', 'categories', 'header', 'photo', 'content', 'estimation',
+                  'comment']
 
 
 class PhotoPostSerializer(serializers.ModelSerializer):
