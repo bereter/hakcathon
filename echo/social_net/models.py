@@ -2,6 +2,7 @@ from django.db import models
 from accounts.models import CustomUser
 from resources import CATEGORIES
 from django.core.mail import send_mail
+from PIL import Image
 
 
 class Category(models.Model):
@@ -22,6 +23,16 @@ class Post(models.Model):
     content = models.TextField()
     post_rating = models.IntegerField(default=0)  # Поле рейтинга поста
 
+    def resize_images(self, new_width, new_height):
+        """Метод для изменения размеров всех изображений под формат портала"""
+        image_fields = [field for field in self._meta.fields if isinstance(field, models.ImageField)]
+
+        for field in image_fields:
+            image_path = getattr(self, field.name).path
+            image = Image.open(image_path)
+            resized_image = image.resize((200, 150))
+            resized_image.save(image_path)
+
     def like(self):
         self.post_rating += 1
         self.save()
@@ -30,7 +41,7 @@ class Post(models.Model):
         return self.content[:100] + '...' if len(self.content) > 100 else self.content
 
     def __str__(self):
-        return f'{self.header}: {self.content[:100]}'
+        return f'{self.header} by {self.author.username}: {self.content[:100]}'
 
 
 class Comment(models.Model):

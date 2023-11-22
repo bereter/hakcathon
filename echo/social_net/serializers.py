@@ -4,12 +4,10 @@ from accounts.models import CustomUser as Profile
 
 
 class PostsSerializer(serializers.ModelSerializer):
-    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    comment_set = serializers.StringRelatedField(many=True)
 
     class Meta:
         model = Post
-        fields = ['author', 'date_created', 'postCategory', 'header', 'photo', 'content', 'estimation', 'comment_set']
+        fields = ['author', 'date_created', 'postCategory', 'header', 'image1', 'content', 'post_rating']
 
 
 class PhotoPostSerializer(serializers.ModelSerializer):
