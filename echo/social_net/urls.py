@@ -1,9 +1,12 @@
-#
-# from django.urls import path
-# #from .views import ()
-#
-#
-# urlpatterns = [
+from .views import PostsViewSet, ProfileViewSet
+from django.urls import path
+# from .views import ()
+
+
+urlpatterns = [
+    path('post_list/', PostsViewSet.as_view({'get': 'list'})),
+    path('profile/<int:pk>/', ProfileViewSet.as_view({'get': 'retrieve', 'put': 'partial_update'})),
+]
 #     path('', PostList.as_view(), name='posts'),
 # #    path('search/', SearchPost.as_view(), name='search_post'),
 # #    path('create/', PostCreate.as_view(), name='post_create'),

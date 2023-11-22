@@ -6,6 +6,7 @@ from accounts.models import CustomUser as User
 from .serializers import PostsSerializer, UserSerializer
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django_filters.rest_framework import DjangoFilterBackend
+from .permissions import IsOwnerOrReadOnly
 
 
 class PaginationAPIList(PageNumberPagination):
@@ -20,7 +21,7 @@ class PostsViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['postCategory__categories', 'author']  # Обновлено для связанного поля postCategory
     ordering_fields = ['postCategory__categories', 'date_created']  # Обновлено для связанного поля postCategory
-    ordering = ['-date_created']
+    ordering = ['-_rating', '-date_created']
     pagination_class = PaginationAPIList
     # permission_classes = (IsAuthenticatedOrReadOnly, )
 
@@ -35,3 +36,4 @@ class PostsViewSet(viewsets.ModelViewSet):
 class ProfileViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = (IsOwnerOrReadOnly,)

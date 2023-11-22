@@ -21,7 +21,13 @@ class Post(models.Model):
     header = models.CharField(max_length=100)
     image1 = models.ImageField(null=True, blank=True)
     content = models.TextField()
-    post_rating = models.IntegerField(default=0)  # Поле рейтинга поста
+    estimation = models.IntegerField(default=0)  # Поле для оценки (от 1 до 5)
+    _rating = models.IntegerField(default=0, db_column='rating')  # Поле рейтинга поста для выдачи в ленту
+
+    def rating(self):
+        self._rating = self.comment.count()
+        self.save()
+        return self._rating
 
     def resize_images(self, new_width, new_height):
         """Метод для изменения размеров всех изображений под формат портала"""
@@ -32,10 +38,6 @@ class Post(models.Model):
             image = Image.open(image_path)
             resized_image = image.resize((200, 150))
             resized_image.save(image_path)
-
-    def like(self):
-        self.post_rating += 1
-        self.save()
 
     def preview(self):
         return self.content[:100] + '...' if len(self.content) > 100 else self.content

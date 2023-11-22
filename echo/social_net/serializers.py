@@ -7,18 +7,20 @@ class PostsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['author', 'date_created', 'postCategory', 'header', 'image1', 'content', 'post_rating']
+        depth = 1
+        fields = ['author', 'date_created', 'postCategory', 'header', 'image1', 'content', 'estimation', 'rating']
 
 
 class PhotoPostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
-        fields = ['photo']
+        fields = ['id', 'image1']
 
 
 class UserSerializer(serializers.ModelSerializer):
-    post_user = PostsSerializer(many=True)
+    post_user = PhotoPostSerializer(many=True)
 
     class Meta:
         model = Profile
+        depth = 1
         fields = ['username', 'photo', 'about', 'subscribers', 'post_user']
