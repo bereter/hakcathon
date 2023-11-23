@@ -18,6 +18,8 @@ class CustomUser(AbstractUser):
         date_birth (DateTimeField): Дата рождения пользователя.
         user_raiting (IntegerField): Рейтинг пользователя.
         vkontakte_id (CharField): Идентификатор пользователя в ВКонтакте.
+        about (CharField): Краткое описание пользователя.
+        subscribers (ManyToManyField): Подписчики пользователя.
 
     Методы:
         link_vk_account(vkontakte_id): Связывает аккаунт пользователя с указанным ID ВКонтакте.
@@ -58,19 +60,40 @@ class CustomUser(AbstractUser):
     )
 
     def update_rating(self):
+        """
+        Обновляет рейтинг пользователя на основе рейтинга его постов.
+        """
         post_rating = self.post_user.aggregate(p_r=Coalesce(Sum('post_rating'), 0))['p_r']
         self.user_raiting = post_rating
         self.save()
 
     def link_vk_account(self, vkontakte_id):
+        """
+        Связывает аккаунт пользователя с указанным ID ВКонтакте.
+
+        :param vkontakte_id: Идентификатор пользователя в ВКонтакте.
+        """
         self.vkontakte_id = vkontakte_id
         self.save()
 
     @classmethod
     def create_user_from_vk(cls, vkontakte_id, username, email=None):
+        """
+        Создает пользователя на основе данных из аккаунта ВКонтакте и автоматически связывает его с указанным ID ВКонтакте.
+
+        :param vkontakte_id: Идентификатор пользователя в ВКонтакте.
+        :param username: Имя пользователя (логин).
+        :param email: Email пользователя.
+        :return: Новый объект пользователя.
+        """
         user = cls.objects.create(username=username, email=email)
         user.link_vk_account(vkontakte_id)
         return user
 
     def __str__(self):
+        """
+        Возвращает строковое представление пользователя (имя).
+
+        :return: Строковое представление пользователя.
+        """
         return self.username

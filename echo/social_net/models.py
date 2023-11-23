@@ -6,6 +6,16 @@ from PIL import Image
 
 
 class Category(models.Model):
+    """
+    Модель для категорий постов.
+
+    Поля:
+        categories (CharField): Категории постов (выбор из CATEGORIES).
+        subscribers (ManyToManyField): Подписчики на категорию.
+
+    Методы:
+        __str__(): Возвращает строковое представление категории.
+    """
     categories = models.CharField(max_length=2, choices=CATEGORIES, default='MV')
     subscribers = models.ManyToManyField('self', symmetrical=False, blank=True, related_name='category_subscribers')
 
@@ -13,15 +23,39 @@ class Category(models.Model):
         return self.categories
 
 
-
 class Post(models.Model):
+    """
+    Модель для постов.
+
+    Поля:
+        author (ForeignKey): Автор поста (связь с CustomUser).
+        date_created (DateTimeField): Дата создания поста.
+        postCategory (ManyToManyField): Категории поста (через промежуточную модель PostCategory).
+        header (CharField): Заголовок поста.
+        image1 (ImageField): Изображение поста.
+        content (TextField): Содержимое поста.
+        estimation (IntegerField): Оценка поста (от 1 до 5).
+        _rating (IntegerField): Рейтинг поста для выдачи в ленту (количество комментариев).
+
+    Методы:
+        rating(): Обновляет и возвращает рейтинг поста на основе количества комментариев.
+        resize_images(new_width, new_height): Изменяет размер всех изображений поста.
+        preview(): Возвращает краткое содержание поста.
+        __str__(): Возвращает строковое представление поста.
+    """
     author = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, related_name='post_user')
     date_created = models.DateTimeField(auto_now_add=True)
     postCategory = models.ManyToManyField(Category, through='PostCategory')
     header = models.CharField(max_length=100)
     image1 = models.ImageField(null=True, blank=True)
     content = models.TextField()
-    post_rating = models.IntegerField(default=0)  # Поле рейтинга поста
+    estimation = models.IntegerField(default=0)
+    _rating = models.IntegerField(default=0, db_column='rating')
+
+    def rating(self):
+        self._rating = self.comment.count()
+        self.save()
+        return self._rating
 
     def resize_images(self, new_width, new_height):
         """Метод для изменения размеров всех изображений под формат портала"""
@@ -33,10 +67,6 @@ class Post(models.Model):
             resized_image = image.resize((200, 150))
             resized_image.save(image_path)
 
-    def like(self):
-        self.post_rating += 1
-        self.save()
-
     def preview(self):
         return self.content[:100] + '...' if len(self.content) > 100 else self.content
 
@@ -45,6 +75,20 @@ class Post(models.Model):
 
 
 class Comment(models.Model):
+    """
+    Модель для комментариев.
+
+    Поля:
+        comment_post (ForeignKey): Пост, к которому относится комментарий.
+        author (ForeignKey): Автор комментария (связь с CustomUser).
+        text (TextField): Текст комментария.
+        time_create (DateTimeField): Дата и время создания комментария.
+        comment (BooleanField): Флаг для обозначения комментария.
+
+    Методы:
+        send_email(): Отправляет уведомление об отклике на пост по электронной почте.
+        __str__(): Возвращает строковое представление комментария.
+    """
     comment_post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comment')
     author = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     text = models.TextField()
@@ -65,5 +109,13 @@ class Comment(models.Model):
 
 
 class PostCategory(models.Model):
+    """
+    Промежуточная модель для связи постов и категорий.
+
+    Поля:
+        postThrough (ForeignKey): Пост.
+        categoryThrough (ForeignKey): Категория.
+    """
     postThrough = models.ForeignKey(Post, on_delete=models.CASCADE)
     categoryThrough = models.ForeignKey(Category, on_delete=models.CASCADE)
+
