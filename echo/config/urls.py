@@ -19,6 +19,9 @@ from django.urls import path, include, re_path
 from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
+from rest_framework.authtoken.views import obtain_auth_token
+from django.contrib.auth.views import LogoutView
+from django.contrib.auth.views import LoginView
 
 from accounts.views import UserRegistrationView, UserLoginView, VKAuthView
 from social_net.views import *
@@ -40,10 +43,17 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('accounts/', include('allauth.urls')),
     path('register/', UserRegistrationView.as_view(), name='user-registration'),
-    path('login/', UserLoginView.as_view(), name='user-login'),
+    path('api/v1/drf-auth/', include('rest_framework.urls')),
+    path('login/', LoginView.as_view(), name='login'),
+    path('api/token/', obtain_auth_token, name='api_token_auth'),   # для API-аутентификации через Django REST framework
+    path('logout/', LogoutView.as_view(), name='logout'),
     path('vk-auth/', VKAuthView.as_view(), name='vk-auth'),
+    path('VKauth/', include('rest_framework_social_oauth2.urls')),
     path('social_net/api/v1/', include('social_net.urls')),
+    path('api/v1/auth/', include('djoser.urls')),  # new
+    re_path(r'^auth/', include('djoser.urls.authtoken')),
     re_path(r'^swagger(\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),

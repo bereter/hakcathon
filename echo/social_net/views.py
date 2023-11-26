@@ -1,10 +1,10 @@
-from django.contrib.auth.models import User
 from rest_framework import viewsets, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
 from .models import Post
 from .serializers import PostsSerializer, UserSerializer, PhotoPostSerializer
 from .permissions import IsOwnerOrReadOnly
+from accounts.models import CustomUser as User
 
 
 class PaginationAPIList(PageNumberPagination):

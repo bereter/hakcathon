@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from accounts.models import CustomUser
+from rest_framework.authtoken.models import Token
+from django.contrib.auth import authenticate
 
 
 class VKAuthSerializer(serializers.Serializer):
@@ -38,6 +40,19 @@ class CustomUserSerializer(serializers.ModelSerializer):
             'about'
         )
 
+    def authenticate(self, **kwargs):
+        """
+        Аутентификация пользователя на основе предоставленных данных.
+        """
+        username = kwargs['username']
+        password = kwargs['password']
+
+        user = CustomUser.objects.get(username=username)
+
+        if user.check_password(password):
+            return user
+        return None
+
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     """
@@ -56,7 +71,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = CustomUser
-        fields = ('username', 'email', 'password', 'vkontakte_id')
+        fields = ('username', 'password')
         extra_kwargs = {'password': {'write_only': True}}
 
 
@@ -75,6 +90,24 @@ class UserLoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
 
+    def validate(self, data):
+        """
+        Проверка введенных данных.
+
+        :param data: Словарь с данными для валидации.
+        :return: Валидированные данные.
+        """
+        username = data.get('username')
+        password = data.get('password')
+
+        user = authenticate(username=username, password=password)
+
+        if user and user.is_active:
+            data['user'] = user
+        else:
+            raise serializers.ValidationError("Неверные учетные данные")
+
+        return data
 
 class VKAuthUserSerializer(serializers.ModelSerializer):
     """

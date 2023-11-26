@@ -25,7 +25,8 @@ class UserRegistrationView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         user = serializer.save()
-        user.set_password(serializer.validated_data['password'])
+        password = serializer.validated_data.get('password')
+        user.set_password(password)
         user.save()
 
 
