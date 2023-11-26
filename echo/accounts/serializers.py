@@ -75,7 +75,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         extra_kwargs = {'password': {'write_only': True}}
 
 
-class UserLoginSerializer(serializers.Serializer):
+class UserLoginSerializer(serializers.ModelSerializer):
     """
     Сериализатор для входа пользователя.
 
@@ -87,39 +87,23 @@ class UserLoginSerializer(serializers.Serializer):
         model (CustomUser): Модель, для которой создается сериализатор.
         fields (tuple): Перечень полей, включаемых в сериализацию.
     """
-    username = serializers.CharField()
-    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = CustomUser
+        fields = ('username', 'password')
+        extra_kwargs = {'password': {'write_only': True}}
 
     def validate(self, data):
-        """
-        Проверка введенных данных.
-
-        :param data: Словарь с данными для валидации.
-        :return: Валидированные данные.
-        """
         username = data.get('username')
         password = data.get('password')
 
         user = authenticate(username=username, password=password)
 
-        if user and user.is_active:
-            data['user'] = user
-        else:
+        if not user or not user.is_active:
             raise serializers.ValidationError("Неверные учетные данные")
 
+        data['user'] = user
         return data
 
-class VKAuthUserSerializer(serializers.ModelSerializer):
-    """
-    Сериализатор для пользователя, созданного через ВКонтакте.
 
-    Поля:
-        vkontakte_id (CharField): Идентификатор пользователя в ВКонтакте.
 
-    Метаданные:
-        model (CustomUser): Модель, для которой создается сериализатор.
-        fields (tuple): Перечень полей, включаемых в сериализацию.
-    """
-    class Meta:
-        model = CustomUser
-        fields = ('vkontakte_id',)

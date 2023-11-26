@@ -22,8 +22,9 @@ from django.conf.urls.static import static
 from rest_framework.authtoken.views import obtain_auth_token
 from django.contrib.auth.views import LogoutView
 from django.contrib.auth.views import LoginView
+from social_django.urls import urlpatterns as social_django_urls
 
-from accounts.views import UserRegistrationView, UserLoginView, VKAuthView
+from accounts.views import UserRegistrationView, VKAuthView, UserLoginAPIView
 from social_net.views import *
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
@@ -44,13 +45,12 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
-    path('register/', UserRegistrationView.as_view(), name='user-registration'),
-    path('api/v1/drf-auth/', include('rest_framework.urls')),
-    path('login/', LoginView.as_view(), name='login'),
-    path('api/token/', obtain_auth_token, name='api_token_auth'),   # для API-аутентификации через Django REST framework
+    path('register/', UserRegistrationView.as_view(), name='user-registration'),   #API для регистрации нового пользователя.
+    path('VKauth/', include('rest_framework_social_oauth2.urls')),   # API для авторизации через VK
+    path('login/', LoginView.as_view(), name='login'),  # стандартная авторизвция для тестов
+    path('api/login/', UserLoginAPIView.as_view(), name='api-login'),   # API для авторизации через имя и пароль
+    path('api/token/', obtain_auth_token, name='api_token_auth'),   # для API-аутентификации через Django REST framework по токену
     path('logout/', LogoutView.as_view(), name='logout'),
-    path('vk-auth/', VKAuthView.as_view(), name='vk-auth'),
-    path('VKauth/', include('rest_framework_social_oauth2.urls')),
     path('social_net/api/v1/', include('social_net.urls')),
     path('api/v1/auth/', include('djoser.urls')),  # new
     re_path(r'^auth/', include('djoser.urls.authtoken')),
@@ -67,4 +67,4 @@ urlpatterns = [
     # # или
     # path('profile/', 'views.profile', name='profile'),
     # path('', include('social_net.urls')),
-    ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + social_django_urls

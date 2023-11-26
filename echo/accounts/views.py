@@ -1,10 +1,13 @@
-from rest_framework import generics
+from django.contrib.auth import authenticate, login
+from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny
+from rest_framework.views import APIView
+
 from .models import CustomUser
-from .serializers import CustomUserSerializer, UserRegistrationSerializer, UserLoginSerializer, VKAuthSerializer
+from .serializers import CustomUserSerializer, UserRegistrationSerializer, UserLoginSerializer
 
 
 class UserRegistrationView(generics.CreateAPIView):
@@ -30,52 +33,49 @@ class UserRegistrationView(generics.CreateAPIView):
         user.save()
 
 
-class UserLoginView(ObtainAuthToken):
-    """
-    API-представление для входа пользователя в систему и получения токена аутентификации.
-
-    Методы:
-        post(request, *args, **kwargs): Обрабатывает POST-запрос для аутентификации пользователя и выдачи токена.
-
-    Поля:
-        serializer_class (UserLoginSerializer): Сериализатор для данных аутентификации пользователя.
-    """
-    serializer_class = UserLoginSerializer
-
+class UserLoginAPIView(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data, context={'request': request})
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data['user']
-        token, created = Token.objects.get_or_create(user=user)
-        user_serializer = CustomUserSerializer(user)  # Используем CustomUserSerializer здесь
-        return Response({'token': token.key, 'user': user_serializer.data})
+        response = super(UserLoginAPIView, self).post(request, *args, **kwargs)
+        token = Token.objects.get(key=response.data['token'])
+        user = token.user
+
+        # Добавляем информацию о входе пользователя
+        user_data = {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,  # добавьте другие необходимые поля
+        }
+
+        return Response({'token': token.key, 'user': user_data})
 
 
-class VKAuthView(generics.CreateAPIView):
+
+class VKAuthView(APIView):
     """
     API-представление для аутентификации через ВКонтакте.
-
-    Методы:
-        create(request, *args, **kwargs): Обрабатывает POST-запрос с данными аутентификации ВКонтакте.
-
-    Поля:
-        serializer_class (VKAuthSerializer): Сериализатор для данных аутентификации ВКонтакте.
-        permission_classes (tuple): Кортеж с классами разрешений (в данном случае, разрешено всем).
     """
-    serializer_class = VKAuthSerializer
-    permission_classes = (AllowAny,)
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
+    permission_classes = [AllowAny]
 
-        vkontakte_id = serializer.validated_data['vkontakte_id']
+    def post(self, request, *args, **kwargs):
+        # Ваша логика обработки запроса для аутентификации через ВКонтакте
+        # ...
+
+        # Пример: получение vkontakte_id из запроса
+        vkontakte_id = request.data.get('vkontakte_id')
+
+        # Пример: создание пользователя или получение существующего
         user, created = CustomUser.objects.get_or_create(vkontakte_id=vkontakte_id)
 
+        # Пример: сохранение пользователя, если он новый
         if created:
             user.save()
 
+        # Пример: создание или получение токена доступа
         token, created = Token.objects.get_or_create(user=user)
-        user_serializer = CustomUserSerializer(user)  # Используем CustomUserSerializer здесь
 
-        return Response({'token': token.key, 'user': user_serializer.data})
+        # Пример: создание сериализатора пользователя
+        user_serializer = CustomUserSerializer(user)
+
+        # Пример: возврат ответа с токеном и данными пользователя
+        return Response({'token': token.key, 'user': user_serializer.data}, status=status.HTTP_200_OK)

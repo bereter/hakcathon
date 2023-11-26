@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     # add apps
     ###
     'social_net',
+    'social_django',
     'django_filters',
     'django.contrib.sites',
     'accounts',
@@ -157,6 +158,8 @@ SITE_ID = 1
 
 SOCIAL_AUTH_VK_OAUTH2_KEY = '51801596'
 SOCIAL_AUTH_VK_OAUTH2_SECRET = 'LaCvEujnzlpTQrCcwMfY'
+SOCIAL_AUTH_URL_NAMESPACE = 'social'
+
 
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
@@ -175,7 +178,13 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     ]
 }
+
+
 LOGIN_REDIRECT_URL = '/'  # Укажите URL, на который перенаправлять после успешного входа
 LOGOUT_REDIRECT_URL = '/'  # Укажите URL, на который перенаправлять после успешного выхода
 
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.vk.VKOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+)
 
